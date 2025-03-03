@@ -1,0 +1,58 @@
+import speedtest as st
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import time
+
+# Listas para armazenar os dados
+times = []
+download_speeds = []
+upload_speeds = []
+pings = []
+
+# Criar figura do gráfico
+fig, ax = plt.subplots()
+ax.set_xlabel("Tempo (s)")
+ax.set_ylabel("Velocidade (Mbps) / Ping (ms)")
+ax.set_title("Teste de Velocidade da Internet em Tempo Real")
+
+# Função que mede a velocidade e atualiza os dados
+def update(frame):
+    global times, download_speeds, upload_speeds, pings
+
+    test = st.Speedtest()
+    
+    down_speed = round(test.download() / 10**6, 2)  # Convertendo para Mbps
+    up_speed = round(test.upload() / 10**6, 2)  # Convertendo para Mbps
+    ping = test.results.ping  # Pegando o ping
+    
+    # Armazenando os dados
+    times.append(time.time() - start_time)
+    download_speeds.append(down_speed)
+    upload_speeds.append(up_speed)
+    pings.append(ping)
+
+    # Limita o número de pontos no gráfico (deixa sempre os últimos 10)
+    if len(times) > 10:
+        times.pop(0)
+        download_speeds.pop(0)
+        upload_speeds.pop(0)
+        pings.pop(0)
+
+    # Limpar o gráfico e redesenhar
+    ax.clear()
+    ax.set_xlabel("Tempo (s)")
+    ax.set_ylabel("Velocidade (Mbps) / Ping (ms)")
+    ax.set_title("Teste de Velocidade da Internet em Tempo Real")
+    ax.plot(times, download_speeds, label="Download (Mbps)", color="blue", marker="o")
+    ax.plot(times, upload_speeds, label="Upload (Mbps)", color="green", marker="o")
+    ax.plot(times, pings, label="Ping (ms)", color="red", marker="o")
+    ax.legend()
+
+# Tempo inicial
+start_time = time.time()
+
+# Criar animação que atualiza o gráfico a cada 5 segundos
+ani = animation.FuncAnimation(fig, update, interval=5000)
+
+# Mostrar gráfico
+plt.show()
